@@ -11,3 +11,9 @@ variable (M : Matrix (Fin m) (Fin n) ℝ) (v : (Fin n) → ℝ)(v₁: (Fin m) �
 #check col v
 #check (row v₁) * M
 #check col (M i)
+
+variable (A : Matrix (Fin n) (Fin n) ℝ)
+variable (S : Set ((Fin n) → ℝ)) (hS : S = {v | A *ᵥ v = 0})
+-- def S := {v | A *ᵥ v = 0}
+#check {v | ∃j, col (A j) = v}
+#check S
