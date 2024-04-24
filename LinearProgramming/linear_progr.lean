@@ -2,7 +2,9 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Matrix.Reflection
 import Mathlib.Data.Matrix.RowCol
-
+import Mathlib.Algebra.BigOperators.Finprod
+open BigOperators
+open Finset
 open Matrix
 variable(m n :ℕ)
 variable (M : Matrix (Fin m) (Fin n) ℝ) (v : (Fin n) → ℝ)(v₁: (Fin m) → ℝ )(i: Fin m)(k: Fin n)
@@ -11,14 +13,20 @@ variable (M : Matrix (Fin m) (Fin n) ℝ) (v : (Fin n) → ℝ)(v₁: (Fin m) �
 #check row v
 #check col v
 #check (row v₁) * M
-#check M i
+#check fun i => M i k
 #check col (M i)
 
+-- take the column of a matrix
+def matrix_col (M : Matrix (Fin m) (Fin n) ℝ) (k: Fin n) := λ x => M x k
 
 variable (A : Matrix (Fin n) (Fin n) ℝ)
 variable (S : Set ((Fin n) → ℝ)) (hS : S = {v | A *ᵥ v = 0})
 
 variable (B: Set (Matrix (Fin n) Unit ℝ))(hB : B = {v | ∃ m₁, v = col (M m₁)})
--- def S := {v | A *ᵥ v = 0}
-#check {v | ∃j, col (A j) = v}
-#check S
+
+-- Define K cone
+noncomputable def K (s : Fin m → NNReal) (v : Fin m → EuclideanSpace ℝ (Fin n))
+[NeZero m]:= ∑ i in range m, s i • v i
+
+variable (s : Fin m → NNReal)(v : Fin m → EuclideanSpace ℝ (Fin n))
+--Define K polar
