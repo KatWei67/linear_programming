@@ -1,22 +1,29 @@
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Matrix.Reflection
-#check EuclideanSpace
+import Mathlib.Data.Matrix.RowCol
+import Mathlib.Algebra.BigOperators.Finprod
+open BigOperators
+open Finset
 open Matrix
-variable (k : Type) [Field k] (n : ℕ)
+--experiement
+variable{m n :ℕ}
+variable (M : Matrix (Fin m) (Fin n) ℝ) (v : (Fin n) → ℝ)(v₁: (Fin m) → ℝ )(i: Fin m)(k: Fin n)
 
-#check EuclideanSpace k (Fin n)
+#check M *ᵥ v  -- works
+#check row v
+#check col v
+#check (row v₁) * M
+#check fun i => M i k
+#check col (M i)
 
-example {𝕜 : Type u_8} [RCLike 𝕜] {n : Type u_9} [Fintype n] (x : EuclideanSpace 𝕜 n) : true := by rfl
-variable (x: EuclideanSpace k (Fin n))
-def E :=  EuclideanSpace k (Fin n)
-#check E k n
+-- take the column of a matrix
+def matrix_col (M : Matrix (Fin m) (Fin n) ℝ) (k: Fin n) := λ x => M x k
 
+variable (A : Matrix (Fin n) (Fin n) ℝ)
+variable (S : Set ((Fin n) → ℝ)) (hS : S = {v | A *ᵥ v = 0})
 
-variable(m n :ℕ) (x: E k n)
-def M := Matrix (Fin m) (Fin n) ℝ
-def v := (Fin n) → ℝ
---#check Matrix.mulVecᵣ M v
+variable (B: Set (Matrix (Fin n) Unit ℝ))(hB : B = {v | ∃ m₁, v = col (M m₁)})
 
---#check (Matrix (Fin m) (Fin n) k) *ᵥ x
---
+variable(a: EuclideanSpace ℝ (Fin n))(b: EuclideanSpace ℝ (Fin n))
+#check a ⬝ᵥ b

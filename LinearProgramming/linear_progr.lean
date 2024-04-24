@@ -6,27 +6,26 @@ import Mathlib.Algebra.BigOperators.Finprod
 open BigOperators
 open Finset
 open Matrix
-variable(m n :ℕ)
-variable (M : Matrix (Fin m) (Fin n) ℝ) (v : (Fin n) → ℝ)(v₁: (Fin m) → ℝ )(i: Fin m)(k: Fin n)
 
-#check M *ᵥ v  -- works
-#check row v
-#check col v
-#check (row v₁) * M
-#check fun i => M i k
-#check col (M i)
+noncomputable section
+variable {n m:ℕ} [NeZero m]
 
--- take the column of a matrix
-def matrix_col (M : Matrix (Fin m) (Fin n) ℝ) (k: Fin n) := λ x => M x k
+def sumK (s : Fin m → NNReal) (v : Fin m → EuclideanSpace ℝ (Fin n))
+:= ∑ i in range m, s i • v i
 
-variable (A : Matrix (Fin n) (Fin n) ℝ)
-variable (S : Set ((Fin n) → ℝ)) (hS : S = {v | A *ᵥ v = 0})
+-- Define K cone 1.2
+variable (vmatrix : Fin m → EuclideanSpace ℝ (Fin n))
+#check sumK
+variable(K: Set (EuclideanSpace ℝ (Fin n)))(hK: K = {x | ∃ s, x = (sumK s vmatrix)})
 
-variable (B: Set (Matrix (Fin n) Unit ℝ))(hB : B = {v | ∃ m₁, v = col (M m₁)})
+--Define K_polar 1.3
+variable(K_polar: Set (EuclideanSpace ℝ (Fin n)))(hK_polar: K_polar =
+{y | ∀ x ∈ K, y ⬝ᵥ x ≤ 0})
 
--- Define K cone
-noncomputable def K (s : Fin m → NNReal) (v : Fin m → EuclideanSpace ℝ (Fin n))
-[NeZero m]:= ∑ i in range m, s i • v i
+--Define K' dual cone 1.4
+variable(K': Set (EuclideanSpace ℝ (Fin n)))(hK': K' = {x | ∀ i, (vmatrix i) ⬝ᵥ x ≤ 0})
 
-variable (s : Fin m → NNReal)(v : Fin m → EuclideanSpace ℝ (Fin n))
---Define K polar
+--Define K_polar_pol 1.5 polar cone of a polar cone
+variable(K_polar_pol: Set (EuclideanSpace ℝ (Fin n)))(hK_polar_pol: K_polar_pol =
+{x | ∀ y ∈ K_polar, y ⬝ᵥ x ≤ 0 })
+
