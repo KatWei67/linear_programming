@@ -2,61 +2,124 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Matrix.Reflection
 import Mathlib.Data.Matrix.RowCol
-
-import Mathlib.Data.Matrix.Notation
-import Mathlib.Data.Real.Basic
-
+import Mathlib.Algebra.BigOperators.Finprod
+import Mathlib.Algebra.BigOperators.Basic
 open BigOperators
 open Finset
--- check
-
 open Matrix
 
--- Definition 1.1
-variable(m n :ℕ)
-variable (M : Matrix (Fin m) (Fin n) ℝ) (v : (Fin n) → ℝ)(v₁: (Fin m) → ℝ )(i: Fin m)(j: Fin n)
-#check M *ᵥ v  -- works
-#check row v
-#check col v
-#check (row v₁) * M
-#check col (M i)
-#check row (M i)
+noncomputable section
 
-variable (A : Matrix (Fin n) (Fin n) ℝ)
-variable (S : Set ((Fin n) → ℝ)) (hS : S = {v | A *ᵥ v = 0})
--- def S := {v | A *ᵥ v = 0}
-#check {v | ∃j, col (A j) = v}
-#check S
+def zero_vec(n: ℕ ): Fin n → ℝ := λ x => 0
+variable {n m:ℕ} [NeZero m]
 
--- Definition 1.2
+theorem dotProduct_comm' (x: Fin n → ℝ )(y: Fin n → ℝ): x ⬝ᵥ y = y ⬝ᵥ x := by
+   apply Matrix.dotProduct_comm
 
--- define a vector λ
-variable(v : vector (Fin n) ℕ)
-#check NNReal
+def sumK (s : Fin m → NNReal) (v : Fin m → Fin n → ℝ)
+:= ∑ i: Fin m, s i • v i
 
--- define cone K
--- sum of λ₁ * a₁ + ... + λμ  * aμ
+-- Define K cone 1.2
+variable (vmatrix : Fin m → Fin n → ℝ)
 
--- pieces:
--- 1. how to do a finite sum?
--- 2. how to define a sequence of number
--- 3. to define a vector?
--- 4. how to make a nonnegative number?
+def K: Set (Fin n → ℝ) := {x | ∃ s, x = (sumK s vmatrix)}
 
--- 1. finite sum
-variable {a: Type*} (s: Finset ℕ) (f: ℕ → ℕ)
-#check ∑ i in range (m + 1), f i
-variable (f: range n → ℕ )
--- #check ∑ i in range n, f i
--- 2. sequence of numbers?
-variable (a : Fun 1 → ℕ )
-#check a  5
--- 3. vector
-#check EuclideanSpace ℝ (Fin n)
+def s_lambda(i : Fin m): (Fin m) → NNReal:= λ x =>
+if x = i then 1 else 0
 
-def cone (s: ℕ → NNReal) (v: ℕ → ℝ) := ∑ i in range n, (s i) * (v i)
--- 1.cone a new interger n := .....
--- 2. learn to convert from (Fin n -> x) to (N -> x)
+lemma t1(i: Fin m): s_lambda i i • vmatrix i = vmatrix i := by
+  ext
+  simp [s_lambda]
+
+lemma t2(i: Fin m)(t: Fin m)(h: t ≠ i): s_lambda i t  • vmatrix i = zero_vec n:= by
+  ext x
+  have: s_lambda i t = 0 := by
+    ext
+    simp [s_lambda]
+    by_contra
+    apply h
+    assumption
+  rw[this]
+  rw[zero_vec]
+  apply zero_mul
+
+-- lemma partition_same (i': Fin m) :
+-- ∑ i : Fin m, s_lambda i' i • vmatrix i =
+-- ∑ i ∈ {x | x < i' /\ x ∈ Fin m}, s_lambda i' i • vmatrix i +
+-- s_lambda i' i' • vmatrix i +
+-- ∑ i ∈ {x | x > i' /\ x ∈ Fin m}, s_lambda i' i • vmatrix i := by
+-- sorry
+
+-- all column vectors are in the cone
+
+lemma vec_in_K(i': Fin m): vmatrix i' ∈ K vmatrix:= by
+  rw[K]
+  use s_lambda i'
+  unfold sumK
+  unfold s_lambda
+  simp
+
+
+--Define K_polar 1.3
+def K_polar: Set (Fin n → ℝ) :=
+{y | ∀ x ∈ K vmatrix, y ⬝ᵥ x ≤ 0}
+
+--Define K' dual cone 1.4
+def K': Set (Fin n → ℝ) := {x | ∀ i, (vmatrix i) ⬝ᵥ x ≤ 0}
+#check K' vmatrix
+--Define K_polar_pol 1.5 polar cone of a polar cone
+def K_polar_pol: Set (Fin n → ℝ) :=
+{x | ∀ y ∈ K_polar vmatrix, y ⬝ᵥ x ≤ 0 }
+
+#check vec_in_K
+theorem dual_eq_polar : K' vmatrix = K_polar vmatrix := by
+   ext y
+   constructor
+   . intro hk'
+     rw[K'] at hk'
+     rw[K_polar]
+     simp
+     sorry
+
+   . intro hy
+     --have h1: ∀ y ∈ K, x ⬝ᵥ y ≤ 0 := by
+     rw[K_polar] at hy
+     rw [K']
+     intro i
+     have h: vmatrix i ∈ K vmatrix := by
+        exact vec_in_K vmatrix i
+     have: ∀ x ∈ K vmatrix, y ⬝ᵥ x ≤ 0 := by
+       exact hy
+     apply this at h
+     rw[dotProduct_comm']
+     exact h
+
+
+
+theorem cone_eq_polar_pol: K vmatrix = K_polar_pol vmatrix:= by
+  sorry
+
+
+
+
+-- 1.9
+-- First, Take any two points x, y ∈ K. For any scalar λ such that 0 ≤ λ ≤ 1,
+-- we need to show that λx + (1 − λ)y ∈ K
+-- theorem combination_of_the_generators {x y : EuclideanSpace ℝ (Fin n)}
+--   (hx : x ∈ K) (hy : y ∈ K) (lambda : ℝ) (hlambda : 0 ≤ lambda ∧ lambda ≤ 1) :
+--   ∃ s : Fin m → NNReal (lambda * x + (1 - lambda) * y = sumK s vmatrix) ∧ ∀ i, 0 ≤ s i
+-- begin
+--   intros x y hx hy λ hλ
+--   rw [mem_cone_span]
+--   obtain ⟨c, hc, rfl⟩ => hx
+--   obtain ⟨d, hd, rfl⟩ => hy,
+--   use (λ * c + (1 - λ) * d),
+--   split,
+--   -- Show non-negativity
+--   all_goals { try {apply add_nonneg}; try {apply mul_nonneg}; assumption },
+--   -- Show the linear combination still results in a vector in the cone
+--   exact convex_combination_of_mem_generating_set hc hd,
+-- end
 
 
 
@@ -70,8 +133,8 @@ def cone (s: ℕ → NNReal) (v: ℕ → ℝ) := ∑ i in range n, (s i) * (v i)
 -- Lemma 1.6
 -- Farkas' Lemma
 -- Define mathematical conditions
-variables {m n : ℕ}
-variables (A : Matrix (Fin m) (Fin n) ℝ) (c : (Fin n) → ℝ)
+variable {m n : ℕ}
+variable (A : Matrix (Fin m) (Fin n) ℝ) (c : (Fin n) → ℝ)
 
 def all_non_positive (v : (Fin m) → ℝ) : Prop :=
   ∀ i, v i ≤ 0
@@ -86,5 +149,3 @@ def system_one_has_solution (A : Matrix (Fin m) (Fin n) ℝ) (c : (Fin n) → �
 def system_two_has_solution (A : Matrix (Fin m) (Fin n) ℝ) (c : (Fin n) → ℝ) : Prop :=
   ∃ lambda : (Fin m) → ℝ, (transpose A) *ᵥ lambda = c ∧ all_non_negative lambda
 
-
---
