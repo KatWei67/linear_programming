@@ -105,21 +105,11 @@ theorem cone_eq_polar_pol: K vmatrix = K_polar_pol vmatrix:= by
 -- 1.9
 -- First, Take any two points x, y ∈ K. For any scalar λ such that 0 ≤ λ ≤ 1,
 -- we need to show that λx + (1 − λ)y ∈ K
--- theorem combination_of_the_generators {x y : EuclideanSpace ℝ (Fin n)}
---   (hx : x ∈ K) (hy : y ∈ K) (lambda : ℝ) (hlambda : 0 ≤ lambda ∧ lambda ≤ 1) :
---   ∃ s : Fin m → NNReal (lambda * x + (1 - lambda) * y = sumK s vmatrix) ∧ ∀ i, 0 ≤ s i
--- begin
---   intros x y hx hy λ hλ
---   rw [mem_cone_span]
---   obtain ⟨c, hc, rfl⟩ => hx
---   obtain ⟨d, hd, rfl⟩ => hy,
---   use (λ * c + (1 - λ) * d),
---   split,
---   -- Show non-negativity
---   all_goals { try {apply add_nonneg}; try {apply mul_nonneg}; assumption },
---   -- Show the linear combination still results in a vector in the cone
---   exact convex_combination_of_mem_generating_set hc hd,
--- end
+set_option checkBinderAnnotations false
+def convex (𝕜 : Type u_1) {E : Type u_2} [ordered_semiring 𝕜] [add_comm_monoid E] [has_smul 𝕜 E] (s : set E) :Prop :=
+sorry
+
+
 
 
 
