@@ -109,6 +109,10 @@ set_option checkBinderAnnotations false
 def convex (𝕜 : Type u) (s : Set E) :Prop := by exact PEmpty.{0}
 
 
+theorem cone_is_convex (K) (hK : ∀ x y, x ∈ K → y ∈ K → ∀ λ : 𝕜, 0 < λ ≤ 1 → λ • x + (1 - λ) • y ∈ K) : convex 𝕜 K := sorry
+
+
+
 
 
 
