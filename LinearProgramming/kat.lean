@@ -106,8 +106,7 @@ theorem cone_eq_polar_pol: K vmatrix = K_polar_pol vmatrix:= by
 -- First, Take any two points x, y ∈ K. For any scalar λ such that 0 ≤ λ ≤ 1,
 -- we need to show that λx + (1 − λ)y ∈ K
 set_option checkBinderAnnotations false
-def convex (𝕜 : Type u_1) {E : Type u_2} [ordered_semiring 𝕜] [add_comm_monoid E] [has_smul 𝕜 E] (s : set E) :Prop :=
-sorry
+def convex (𝕜 : Type u) (s : Set E) :Prop := by exact PEmpty.{0}
 
 
 
