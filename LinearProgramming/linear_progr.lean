@@ -23,32 +23,9 @@ def sumK (s : Fin m → NNReal) (v : Fin m → Fin n → ℝ)
 variable (vmatrix : Fin m → Fin n → ℝ)
 
 def K: Set (Fin n → ℝ) := {x | ∃ s, x = (sumK s vmatrix)}
-
+#check K
 def s_lambda(i : Fin m): (Fin m) → NNReal:= λ x =>
 if x = i then 1 else 0
-
-lemma t1(i: Fin m): s_lambda i i • vmatrix i = vmatrix i := by
-  ext
-  simp [s_lambda]
-
-lemma t2(i: Fin m)(t: Fin m)(h: t ≠ i): s_lambda i t  • vmatrix i = zero_vec n:= by
-  ext x
-  have: s_lambda i t = 0 := by
-    ext
-    simp [s_lambda]
-    by_contra
-    apply h
-    assumption
-  rw[this]
-  rw[zero_vec]
-  apply zero_mul
-
--- lemma partition_same (i': Fin m) :
--- ∑ i : Fin m, s_lambda i' i • vmatrix i =
--- ∑ i ∈ {x | x < i' /\ x ∈ Fin m}, s_lambda i' i • vmatrix i +
--- s_lambda i' i' • vmatrix i +
--- ∑ i ∈ {x | x > i' /\ x ∈ Fin m}, s_lambda i' i • vmatrix i := by
--- sorry
 
 -- all column vectors are in the cone
 
@@ -56,31 +33,66 @@ lemma vec_in_K(i': Fin m): vmatrix i' ∈ K vmatrix:= by
   rw[K]
   use s_lambda i'
   unfold sumK
-
-  sorry
+  -- rw [s_lambda_def]
+  simp [s_lambda]
 
 --Define K_polar 1.3
 def K_polar: Set (Fin n → ℝ) :=
 {y | ∀ x ∈ K vmatrix, y ⬝ᵥ x ≤ 0}
 
 --Define K' dual cone 1.4
-def K': Set (Fin n → ℝ) := {x | ∀ i, (vmatrix i) ⬝ᵥ x ≤ 0}
+def K': Set (Fin n → ℝ) := {x | ∀ i, x ⬝ᵥ (vmatrix i)  ≤ 0}
 #check K' vmatrix
 --Define K_polar_pol 1.5 polar cone of a polar cone
 def K_polar_pol: Set (Fin n → ℝ) :=
 {x | ∀ y ∈ K_polar vmatrix, y ⬝ᵥ x ≤ 0 }
+variable(i: Fin m)
+#check vmatrix i
 
-#check vec_in_K
+
+lemma dotproduct_sum_eq (v : Fin n → ℝ ) (A : Fin m → (Fin n → ℝ ))
+: v ⬝ᵥ ∑ i, A i = ∑ i, v ⬝ᵥ A i := by
+  convert_to v ⬝ᵥ (1 ᵥ* A) = (A *ᵥ v) ⬝ᵥ 1
+  · unfold Matrix.vecMul
+    congr
+    ext
+    simp [Matrix.dotProduct]
+  · congr
+    simp [Matrix.mulVec]
+    ext
+    simp [Matrix.dotProduct, mul_comm]
+  conv => rhs; rw [Matrix.dotProduct_comm]
+  rw [Matrix.dotProduct_mulVec]
+  conv => lhs; rw [Matrix.dotProduct_comm]
+
+
+lemma Farkas_lemma_partial(t: Fin n → ℝ)( ht: t ∉ K vmatrix):
+∃ y ∈ K' vmatrix, y ⬝ᵥ t > 0:= by sorry
+
+
 theorem dual_eq_polar : K' vmatrix = K_polar vmatrix := by
    ext y
    constructor
    . intro hk'
      rw[K'] at hk'
      rw[K_polar]
-     sorry
-
+     intro x hx
+     rw[K] at hx
+     rcases hx with ⟨s, hs⟩
+     rw[hs]
+     unfold sumK
+     simp at hk'
+     rw[dotproduct_sum_eq]
+     have(x: Fin m): y ⬝ᵥ s x • vmatrix x =  s x • y ⬝ᵥ vmatrix x := by
+        rw [Matrix.dotProduct_comm]
+        simp
+        rw[dotProduct_comm']
+     simp[this]
+     have h (x: Fin m) : s x • (y ⬝ᵥ vmatrix x) ≤ 0 := by
+       have h1: s x ≥ 0 := by exact zero_le (s x)
+       apply smul_nonpos_of_nonneg_of_nonpos h1 (hk' x)
+     exact Fintype.sum_nonpos h
    . intro hy
-     --have h1: ∀ y ∈ K, x ⬝ᵥ y ≤ 0 := by
      rw[K_polar] at hy
      rw [K']
      intro i
@@ -89,8 +101,8 @@ theorem dual_eq_polar : K' vmatrix = K_polar vmatrix := by
      have: ∀ x ∈ K vmatrix, y ⬝ᵥ x ≤ 0 := by
        exact hy
      apply this at h
-     rw[dotProduct_comm']
      exact h
+
 
 
 
