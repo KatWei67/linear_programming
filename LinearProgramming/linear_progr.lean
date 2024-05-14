@@ -27,7 +27,6 @@ def K: Set (Fin n → ℝ) := {x | ∃ s, x = (sumK s vmatrix)}
 def s_lambda(i : Fin m): (Fin m) → NNReal:= λ x =>
 if x = i then 1 else 0
 
-
 -- all column vectors are in the cone
 lemma vec_in_K(i': Fin m): vmatrix i' ∈ K vmatrix:= by
   rw[K]
@@ -40,7 +39,7 @@ def K_polar: Set (Fin n → ℝ) :=
 {y | ∀ x ∈ K vmatrix, y ⬝ᵥ x ≤ 0}
 
 --Define K' dual cone 1.4
-def K': Set (Fin n → ℝ) := {x | ∀ i, x ⬝ᵥ (vmatrix i)  ≤ 0}
+def K': Set (Fin n → ℝ) := {x | ∀ i, (vmatrix i) ⬝ᵥ x ≤ 0}
 
 def K_dual: Set (Fin n → ℝ) := {x | vmatrix *ᵥ x ≤ 0}
 
@@ -51,16 +50,16 @@ lemma dual_eq: K' vmatrix = K_dual vmatrix := by
     rw[K'] at h'
     simp at h'
     rw[K_dual]
-    simp
-    sorry
+    simp[h']
+    intro i'
+    exact h' i'
   . intro h_dual
     rw[K_dual] at h_dual
     simp at h_dual
     rw[K']
     simp
     intro i
-    sorry
-#check dual_eq
+    exact h_dual i
 
 #check K' vmatrix
 --Define K_polar_pol 1.5 polar cone of a polar cone
@@ -89,7 +88,6 @@ lemma dotproduct_sum_eq (v : Fin n → ℝ ) (A : Fin m → (Fin n → ℝ ))
 lemma Farkas_lemma_2(t: Fin n → ℝ)(h: t ∉ K vmatrix): ∃ y : Fin n → ℝ, vmatrix *ᵥ y ≤ 0
 ∧ t ⬝ᵥ y > 0 := by sorry
 
-#check Farkas_lemma_2
 theorem dual_eq_polar : K' vmatrix = K_polar vmatrix := by
    ext y
    constructor
@@ -103,12 +101,10 @@ theorem dual_eq_polar : K' vmatrix = K_polar vmatrix := by
      unfold sumK
      simp at hk'
      rw[dotproduct_sum_eq]
-     have(x: Fin m): y ⬝ᵥ s x • vmatrix x =  s x • y ⬝ᵥ vmatrix x := by
+     have(x: Fin m): y ⬝ᵥ s x • vmatrix x =  s x •vmatrix x  ⬝ᵥ y:= by
         rw [Matrix.dotProduct_comm]
-        simp
-        rw[dotProduct_comm']
      simp[this]
-     have h (x: Fin m) : s x • (y ⬝ᵥ vmatrix x) ≤ 0 := by
+     have h (x: Fin m) : s x • (vmatrix x ⬝ᵥ y) ≤ 0 := by
        have h1: s x ≥ 0 := by exact zero_le (s x)
        apply smul_nonpos_of_nonneg_of_nonpos h1 (hk' x)
      exact Fintype.sum_nonpos h
@@ -121,6 +117,7 @@ theorem dual_eq_polar : K' vmatrix = K_polar vmatrix := by
      have: ∀ x ∈ K vmatrix, y ⬝ᵥ x ≤ 0 := by
        exact hy
      apply this at h
+     rw[dotProduct_comm']
      exact h
 
 
@@ -138,7 +135,6 @@ theorem cone_eq_polar_pol: K vmatrix = K_polar_pol vmatrix:= by
     contrapose hpp
     rw[K] at hpp
     simp at hpp
-    --push_neg at hpp
     have h': x ∉ K vmatrix := by
       rw[K]
       simp
