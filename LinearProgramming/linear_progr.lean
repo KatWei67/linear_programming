@@ -27,13 +27,12 @@ def K: Set (Fin n → ℝ) := {x | ∃ s, x = (sumK s vmatrix)}
 def s_lambda(i : Fin m): (Fin m) → NNReal:= λ x =>
 if x = i then 1 else 0
 
--- all column vectors are in the cone
 
+-- all column vectors are in the cone
 lemma vec_in_K(i': Fin m): vmatrix i' ∈ K vmatrix:= by
   rw[K]
   use s_lambda i'
   unfold sumK
-  -- rw [s_lambda_def]
   simp [s_lambda]
 
 --Define K_polar 1.3
@@ -42,6 +41,27 @@ def K_polar: Set (Fin n → ℝ) :=
 
 --Define K' dual cone 1.4
 def K': Set (Fin n → ℝ) := {x | ∀ i, x ⬝ᵥ (vmatrix i)  ≤ 0}
+
+def K_dual: Set (Fin n → ℝ) := {x | vmatrix *ᵥ x ≤ 0}
+
+lemma dual_eq: K' vmatrix = K_dual vmatrix := by
+  ext x
+  constructor
+  . intro h'
+    rw[K'] at h'
+    simp at h'
+    rw[K_dual]
+    simp
+    sorry
+  . intro h_dual
+    rw[K_dual] at h_dual
+    simp at h_dual
+    rw[K']
+    simp
+    intro i
+    sorry
+#check dual_eq
+
 #check K' vmatrix
 --Define K_polar_pol 1.5 polar cone of a polar cone
 def K_polar_pol: Set (Fin n → ℝ) :=
@@ -66,10 +86,10 @@ lemma dotproduct_sum_eq (v : Fin n → ℝ ) (A : Fin m → (Fin n → ℝ ))
   conv => lhs; rw [Matrix.dotProduct_comm]
 
 
-lemma Farkas_lemma_partial(t: Fin n → ℝ)( ht: t ∉ K vmatrix):
-∃ y ∈ K' vmatrix, y ⬝ᵥ t > 0:= by sorry
+lemma Farkas_lemma_2(t: Fin n → ℝ)(h: t ∉ K vmatrix): ∃ y : Fin n → ℝ, vmatrix *ᵥ y ≤ 0
+∧ t ⬝ᵥ y > 0 := by sorry
 
-
+#check Farkas_lemma_2
 theorem dual_eq_polar : K' vmatrix = K_polar vmatrix := by
    ext y
    constructor
@@ -104,7 +124,45 @@ theorem dual_eq_polar : K' vmatrix = K_polar vmatrix := by
      exact h
 
 
-
-
 theorem cone_eq_polar_pol: K vmatrix = K_polar_pol vmatrix:= by
-  sorry
+  ext x
+  constructor
+  . intro hk
+    rw[K_polar_pol]
+    rw[K_polar]
+    simp
+    intro y hy
+    apply hy
+    exact hk
+  . intro hpp
+    contrapose hpp
+    rw[K] at hpp
+    simp at hpp
+    --push_neg at hpp
+    have h': x ∉ K vmatrix := by
+      rw[K]
+      simp
+      exact hpp
+    push_neg at hpp
+    have h1: ∃ y: Fin n  → ℝ , vmatrix *ᵥ y ≤ 0 ∧ x ⬝ᵥ y > 0 := by
+      apply Farkas_lemma_2 vmatrix x h'
+    rcases h1 with ⟨y, hy⟩
+    intro hx
+    have h1: y ∈ K_dual vmatrix := by
+      rw[K_dual]
+      simp
+      exact hy.1
+    have h2: y ∈ K' vmatrix := by
+      rw[dual_eq vmatrix]
+      exact h1
+    have h3: K_polar vmatrix = K' vmatrix := by
+      simp[dual_eq_polar vmatrix]
+    have h4: y ∈ K_polar vmatrix := by
+      rw[h3]
+      exact h2
+    rw[K_polar_pol] at hx; simp at hx
+    have: y ⬝ᵥ x ≤ 0 := by
+      apply hx
+      exact h4
+    rw[dotProduct_comm'] at this
+    linarith[this, hy.2]
