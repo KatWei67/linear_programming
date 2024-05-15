@@ -16,16 +16,23 @@ variable {n m:ℕ} [NeZero m]
 theorem dotProduct_comm' (x: Fin n → ℝ )(y: Fin n → ℝ): x ⬝ᵥ y = y ⬝ᵥ x := by
    apply Matrix.dotProduct_comm
 
-def sumK (s : Fin m → NNReal) (v : Fin m → Fin n → ℝ)
+def sumK (s : Fin m → ℝ) (v : Fin m → Fin n → ℝ)
 := ∑ i: Fin m, s i • v i
 
 -- Define K cone 1.2
 variable (vmatrix : Fin m → Fin n → ℝ)
 
-def K: Set (Fin n → ℝ) := {x | ∃ s, x = (sumK s vmatrix)}
+def K: Set (Fin n → ℝ) := {x | ∃ s ≥ 0, x = (sumK s vmatrix)}
 #check K
-def s_lambda(i : Fin m): (Fin m) → NNReal:= λ x =>
+def s_lambda(i : Fin m): (Fin m) → ℝ := λ x =>
 if x = i then 1 else 0
+#check s_lambda
+
+example (cond : Prop) [Decidable cond] : (if cond then (a:ℝ) else (b:ℝ)) ≥ min a b := by
+  by_cases h : cond
+  simp [h]
+  simp [h]
+
 
 -- all column vectors are in the cone
 lemma vec_in_K(i': Fin m): vmatrix i' ∈ K vmatrix:= by
@@ -33,6 +40,16 @@ lemma vec_in_K(i': Fin m): vmatrix i' ∈ K vmatrix:= by
   use s_lambda i'
   unfold sumK
   simp [s_lambda]
+  intro ix
+  rw[s_lambda]
+  simp
+  by_cases h : (ix = i')
+  simp [h]
+  simp [h]
+
+
+
+
 
 --Define K_polar 1.3
 def K_polar: Set (Fin n → ℝ) :=
@@ -96,7 +113,7 @@ theorem dual_eq_polar : K' vmatrix = K_polar vmatrix := by
      rw[K_polar]
      intro x hx
      rw[K] at hx
-     rcases hx with ⟨s, hs⟩
+     rcases hx with ⟨s, hs_nonneg,hs⟩
      rw[hs]
      unfold sumK
      simp at hk'
@@ -105,7 +122,7 @@ theorem dual_eq_polar : K' vmatrix = K_polar vmatrix := by
         rw [Matrix.dotProduct_comm]
      simp[this]
      have h (x: Fin m) : s x • (vmatrix x ⬝ᵥ y) ≤ 0 := by
-       have h1: s x ≥ 0 := by exact zero_le (s x)
+       have h1: s x ≥ 0 := by exact hs_nonneg x
        apply smul_nonpos_of_nonneg_of_nonpos h1 (hk' x)
      exact Fintype.sum_nonpos h
    . intro hy
