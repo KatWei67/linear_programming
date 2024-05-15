@@ -28,12 +28,6 @@ def s_lambda(i : Fin m): (Fin m) → ℝ := λ x =>
 if x = i then 1 else 0
 #check s_lambda
 
-example (cond : Prop) [Decidable cond] : (if cond then (a:ℝ) else (b:ℝ)) ≥ min a b := by
-  by_cases h : cond
-  simp [h]
-  simp [h]
-
-
 -- all column vectors are in the cone
 lemma vec_in_K(i': Fin m): vmatrix i' ∈ K vmatrix:= by
   rw[K]
@@ -46,10 +40,6 @@ lemma vec_in_K(i': Fin m): vmatrix i' ∈ K vmatrix:= by
   by_cases h : (ix = i')
   simp [h]
   simp [h]
-
-
-
-
 
 --Define K_polar 1.3
 def K_polar: Set (Fin n → ℝ) :=
@@ -179,3 +169,61 @@ theorem cone_eq_polar_pol: K vmatrix = K_polar_pol vmatrix:= by
       exact h4
     rw[dotProduct_comm'] at this
     linarith[this, hy.2]
+
+
+lemma add_sum_vec (a b: ℝ)(va vb: Fin m → ℝ)(vmatrix: Fin m → Fin n → ℝ):
+∑ i : Fin m, a • va i • vmatrix i + ∑ i : Fin m, b • vb i • vmatrix i = ∑ i : Fin m, (a
+• va i + b • vb i) •
+vmatrix i := by
+  rw[← Finset.sum_add_distrib]
+  apply Finset.sum_congr
+  . rfl
+  . intro x hx
+    rw[add_smul]
+    rw[smul_assoc,smul_assoc]
+
+theorem K_convex: Convex ℝ (K vmatrix) := by
+  rw[Convex]
+  intro x hx
+  rw[K] at hx
+  simp at hx
+  rcases hx with ⟨sx ,⟨hsxnonneg, hx⟩ ⟩
+  rw[StarConvex]
+  intro y hy a b ha hb hab
+  rcases hy with ⟨sy , ⟨hsynonneg,hy⟩ ⟩
+  rw[K]
+  simp
+  use a • sx + b • sy
+  constructor
+  . have h1 : 0 ≤ a • sx := by exact smul_nonneg ha hsxnonneg
+    have h2: 0 ≤ b • sy := by exact smul_nonneg hb hsynonneg
+    exact Left.add_nonneg h1 h2
+  . rw[hx, hy]
+    rw[sumK, sumK, sumK]
+    rw[Finset.smul_sum, Finset.smul_sum]
+    rw[add_sum_vec]
+    simp
+
+theorem K_polar_convex:  Convex ℝ (K_polar vmatrix) := by
+  rw[Convex]
+  intro x hx
+  rw[StarConvex]
+  intro y hy
+  intro a b apos bpos aplusb
+  rw[K_polar]
+  simp
+  intro z hz
+  have h1: x ⬝ᵥ z ≤ 0 := by
+    rw[K_polar] at hx
+    simp at hx
+    apply hx z
+    exact hz
+  have h2: y ⬝ᵥ z ≤ 0 := by
+    rw[K_polar] at hy
+    simp at hy
+    apply hy z
+    exact hz
+  apply add_nonpos
+  sorry
+
+  #check mul_assoc
