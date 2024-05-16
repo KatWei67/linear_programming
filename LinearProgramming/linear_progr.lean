@@ -19,9 +19,9 @@ theorem dotProduct_comm' (x: Fin n → ℝ )(y: Fin n → ℝ): x ⬝ᵥ y = y �
 def sumK (s : Fin m → ℝ) (v : Fin m → Fin n → ℝ)
 := ∑ i: Fin m, s i • v i
 
--- Define K cone 1.2
 variable (vmatrix : Fin m → Fin n → ℝ)
 
+-- Define K cone 1.2
 def K: Set (Fin n → ℝ) := {x | ∃ s ≥ 0, x = (sumK s vmatrix)}
 #check K
 def s_lambda(i : Fin m): (Fin m) → ℝ := λ x =>
@@ -68,12 +68,9 @@ lemma dual_eq: K' vmatrix = K_dual vmatrix := by
     intro i
     exact h_dual i
 
-#check K' vmatrix
 --Define K_polar_pol 1.5 polar cone of a polar cone
 def K_polar_pol: Set (Fin n → ℝ) :=
 {x | ∀ y ∈ K_polar vmatrix, y ⬝ᵥ x ≤ 0 }
-variable(i: Fin m)
-#check vmatrix i
 
 
 lemma dotproduct_sum_eq (v : Fin n → ℝ ) (A : Fin m → (Fin n → ℝ ))
@@ -224,6 +221,13 @@ theorem K_polar_convex:  Convex ℝ (K_polar vmatrix) := by
     apply hy z
     exact hz
   apply add_nonpos
-  sorry
-
-  #check mul_assoc
+  . apply mul_nonpos_iff.2
+    left
+    constructor
+    . exact apos
+    . exact h1
+  . apply mul_nonpos_iff.2
+    left
+    constructor
+    exact bpos
+    exact h2
