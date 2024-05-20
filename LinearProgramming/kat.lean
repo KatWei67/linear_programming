@@ -61,27 +61,11 @@ theorem K_polar_convex: Convex ℝ (K_polar vmatrix) := by
     exact hx z hz
   have h_2: y ⬝ᵥ z ≤ 0 := by
     exact hy z hz
-  have h': (a • x)⬝ᵥ z  + (b • y)⬝ᵥ z ≤ a • 0 + b • 0 := by
-   sorry
-
-  --y hx hy a b ha hb hab
-
-  -- simp only [K_polar] at hy
-  -- simp at hy
-  -- intro z
-  -- intro hz
-  -- rw[K] at hz
-  -- simp at hz
-  -- rcases hz with ⟨ s, hs⟩
-  -- have h': (a • x)⬝ᵥ z  + (b • hx)⬝ᵥ z ≤ a • 0 + b • 0 := by
-
-
-
-  -- calc
-  --   (a • x + b • hx) ⬝ᵥ z = (a • x)⬝ᵥ z  + (b • hx)⬝ᵥ z := by rw[add_dotProduct]
-  --   _ ≤ a • 0 + b • 0 := by sorry
-  --   _ = 0 := by exact Convex.combo_self hab 0
-
+  apply add_nonpos
+  have h_3: a * x ⬝ᵥ z ≤ 0 := by exact mul_nonpos_of_nonneg_of_nonpos ha (hx z hz)
+  exact h_3
+  have h_4: b * y ⬝ᵥ z ≤ 0 := by exact mul_nonpos_of_nonneg_of_nonpos hb (hy z hz)
+  exact h_4 
 
 -- Lemma 1.6
 -- Farkas' Lemma
