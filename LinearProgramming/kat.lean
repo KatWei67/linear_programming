@@ -58,10 +58,11 @@ theorem K_polar_convex: Convex ℝ (K_polar vmatrix) := by
   rw[K]
   intro z hz
   have h_1: x ⬝ᵥ z ≤ 0 := by
-    sorry
-  have h_2: y ⬝ᵥ z ≤ 0 := by sorry
-  have h': (a • x)⬝ᵥ z  + (b • y)⬝ᵥ z ≤ a • 0 + b • 0 := by sorry
-  sorry
+    exact hx z hz
+  have h_2: y ⬝ᵥ z ≤ 0 := by
+    exact hy z hz
+  have h': (a • x)⬝ᵥ z  + (b • y)⬝ᵥ z ≤ a • 0 + b • 0 := by
+   sorry
 
   --y hx hy a b ha hb hab
 
