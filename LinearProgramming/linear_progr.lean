@@ -202,32 +202,53 @@ theorem K_convex: Convex ℝ (K vmatrix) := by
     simp
 
 theorem K_polar_convex:  Convex ℝ (K_polar vmatrix) := by
+  -- rw[Convex]
+  -- intro x hx
+  -- rw[StarConvex]
+  -- intro y hy
+  -- intro a b apos bpos aplusb
+  -- rw[K_polar]
+  -- simp
+  -- intro z hz
+  -- have h1: x ⬝ᵥ z ≤ 0 := by
+  --   rw[K_polar] at hx
+  --   simp at hx
+  --   apply hx z
+  --   exact hz
+  -- have h2: y ⬝ᵥ z ≤ 0 := by
+  --   rw[K_polar] at hy
+  --   simp at hy
+  --   apply hy z
+  --   exact hz
+  -- apply add_nonpos
+  -- . apply mul_nonpos_iff.2
+  --   left
+  --   constructor
+  --   . exact apos
+  --   . exact h1
+  -- . apply mul_nonpos_iff.2
+  --   left
+  --   constructor
+  --   exact bpos
+  --   exact h2
+
   rw[Convex]
-  intro x hx
-  rw[StarConvex]
-  intro y hy
-  intro a b apos bpos aplusb
+  intros x hx y hy a b ha hb ha_b
+  rw[K_polar] at hx
+  simp at hx
+  rw[K] at hx
+  rw[K_polar] at hy
+  rw[K] at hy
   rw[K_polar]
   simp
+  rw[K]
   intro z hz
-  have h1: x ⬝ᵥ z ≤ 0 := by
-    rw[K_polar] at hx
-    simp at hx
-    apply hx z
-    exact hz
-  have h2: y ⬝ᵥ z ≤ 0 := by
-    rw[K_polar] at hy
-    simp at hy
-    apply hy z
-    exact hz
+  have h_1: x ⬝ᵥ z ≤ 0 := by
+    exact hx z hz
+  have h_2: y ⬝ᵥ z ≤ 0 := by
+    exact hy z hz
   apply add_nonpos
-  . apply mul_nonpos_iff.2
-    left
-    constructor
-    . exact apos
-    . exact h1
-  . apply mul_nonpos_iff.2
-    left
-    constructor
-    exact bpos
-    exact h2
+  have h_3: a * x ⬝ᵥ z ≤ 0 := by exact mul_nonpos_of_nonneg_of_nonpos ha (hx z hz)
+  exact h_3
+  have h_4: b * y ⬝ᵥ z ≤ 0 := by exact mul_nonpos_of_nonneg_of_nonpos hb (hy z hz)
+  exact h_4 
