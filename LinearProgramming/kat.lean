@@ -40,10 +40,9 @@ theorem K_convex: Convex ℝ (K vmatrix) := by
     exact Left.add_nonneg h1 h2
   . rw[hx, hy]
     rw[sumK, sumK, sumK]
+    rw[Finset.smul_sum, Finset.smul_sum]
+    rw[add_sum_vec]
     simp
-
-
-    sorry
 
 theorem K_polar_convex: Convex ℝ (K_polar vmatrix) := by
   rw[Convex]
